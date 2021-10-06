@@ -1,6 +1,10 @@
 <template>
-  <div id="scoreboard">
-    <h2 v-if="data[0]">{{ data[0].url }}</h2>
+  <h2 v-if="data[0]">{{ data[0].url }}</h2>
+  <div class="modal-cont" id="scoreboard">
+    <div v-if="batch" class="modal">
+      <span>Auditing Website...</span>
+    </div>
+
     <div>
       <score-card
         :percentage="isNaNCat(avgPerf)"
@@ -91,7 +95,7 @@ export default defineComponent({
 
     return { avg, avgPerf, avgAcc, avgBP, avgSeo, isNaNCat };
   },
-  props: ["data"],
+  props: ["data", "batch"],
   components: {
     ScoreCard,
   },
@@ -106,5 +110,38 @@ export default defineComponent({
 #scoreboard > div {
   display: flex;
   justify-content: space-around;
+}
+
+.modal-cont {
+  position: relative;
+}
+.modal {
+  position: absolute;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal > span {
+  animation: waitpulse infinite alternate-reverse ease-in-out 3s;
+}
+
+@keyframes waitpulse {
+  20% {
+    text-shadow: 0 0 10px rgba(255, 0, 0, 1);
+  }
+
+  70% {
+    text-shadow: 0 0 50px rgba(255, 0, 0, 1);
+  }
+
+  100% {
+    text-shadow: 0 0 10px rgba(255, 0, 0, 1);
+  }
 }
 </style>

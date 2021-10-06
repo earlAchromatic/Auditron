@@ -7,10 +7,10 @@
       <input
         type="text"
         v-model="searchTerm"
-        @keyup.enter="runAudit(searchTerm)"
+        @keyup.enter="sendSearchTerm(searchTerm)"
       />
       <div class="cap cap-right">
-        <button @click="runAudit(searchTerm)">audit!</button>
+        <button @click="sendSearchTerm(searchTerm)">audit!</button>
       </div>
     </div>
   </div>
@@ -18,7 +18,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import axios from "axios";
 
 export default defineComponent({
   data() {
@@ -27,62 +26,10 @@ export default defineComponent({
     };
   },
   methods: {
-    runAudit(search: string) {
+    sendSearchTerm(searchTerm: string) {
+      this.$emit("searchThisTerm", searchTerm);
       const searchbar: HTMLElement = this.$el.querySelector("#search div");
       console.log("posted");
-
-      axios.interceptors.response.use(async (res) => {
-        if (res.status === 202) {
-          console.log("HTTP 202 received, polling operation...");
-          console.log("Operation running at " + res.headers.location);
-          let pollingResponse = await axios.get(`/api${res.headers.location}`);
-          console.log(pollingResponse.data);
-          while (
-            pollingResponse.data.status !== "Succeeded" &&
-            pollingResponse.data.status !== "Failed"
-          ) {
-            pollingResponse = await axios.get(`/api${res.headers.location}`);
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            console.log("Operation status is " + pollingResponse.data.status);
-          }
-          if (
-            pollingResponse !== undefined &&
-            pollingResponse.data.status === "Failed"
-          ) {
-            // Treat failures as exceptions, so they can be handled as such
-            throw "Operation failed!";
-          } else {
-            console.log("Operation succeeded!");
-            console.log(
-              "Retrieving resource at " + pollingResponse.headers.location
-            );
-            return await axios.get(`/api${res.headers.location}`);
-          }
-        }
-        return res;
-      });
-
-      axios({
-        method: "POST",
-        url: "/api/build-list",
-        data: {
-          site: `https://${search}`,
-        },
-      })
-        .then((res) => {
-          this.$emit("searchReturn", res.data.result.tableTransform);
-          console.log(res.data.result);
-        })
-        .catch((err) => {
-          if (err.response) {
-            console.log(err.response.data);
-          } else if (err.request) {
-            console.log(err.request);
-          } else {
-            console.log("Error", err.message);
-          }
-        });
-
       searchbar.classList.add("pulsar");
       setTimeout(() => {
         searchbar.classList.remove("pulsar");
@@ -115,7 +62,7 @@ export default defineComponent({
   transition: box-shadow 0.1s ease-in-out;
 }
 .pulsar {
-  animation: pulse 1s ease-in-out 1;
+  animation: pulse 2s ease-in-out 1;
 }
 
 input[type="text"] {
