@@ -1,6 +1,6 @@
 <template>
   <main>
-    <score-board :data="data"></score-board>
+    <score-board :data="data" :batch="batch"></score-board>
     <button @click="showDetail = !showDetail">See Detail</button>
     <template v-if="showDetail">
       <!-- <the-table :data="data"></the-table> -->
@@ -20,7 +20,7 @@ export default defineComponent({
       showDetail: false,
     };
   },
-  props: ["data"],
+  props: ["data", "batch"],
   components: {
     ScoreBoard,
     TheTable,
@@ -30,6 +30,7 @@ export default defineComponent({
 
 <style scoped>
 main {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
