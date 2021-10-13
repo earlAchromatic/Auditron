@@ -1,6 +1,6 @@
 import { AxiosInstance } from "axios";
 
-export default function (axiosInstance: AxiosInstance) {
+export default function (axiosInstance: AxiosInstance, cb: any) {
   axiosInstance.interceptors.response.use(async (res) => {
     if (res.status === 202) {
       console.log("HTTP 202 received, polling operation...");
@@ -16,6 +16,7 @@ export default function (axiosInstance: AxiosInstance) {
         pollingResponse = await axiosInstance.get(
           `/api${res.headers.location}`
         );
+        cb(pollingResponse);
         await new Promise((resolve) => setTimeout(resolve, 1000));
         console.log("Operation status is " + pollingResponse.data.status);
       }

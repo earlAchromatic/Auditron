@@ -41,6 +41,7 @@ export default defineComponent({
 
 <style scoped>
 #search {
+  min-width: 50vw;
   max-width: var(--measure);
   padding: 2rem;
   margin-right: auto;
@@ -62,7 +63,7 @@ export default defineComponent({
   transition: box-shadow 0.1s ease-in-out;
 }
 .pulsar {
-  animation: pulse 2s ease-in-out 1;
+  animation: pulse 1s ease-in-out 1;
 }
 
 input[type="text"] {

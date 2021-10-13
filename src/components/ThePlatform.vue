@@ -3,7 +3,6 @@
     <score-board :data="data" :batch="batch"></score-board>
     <button @click="showDetail = !showDetail">See Detail</button>
     <template v-if="showDetail">
-      <!-- <the-table :data="data"></the-table> -->
       <the-table :data="data"></the-table>
     </template>
   </main>

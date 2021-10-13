@@ -1,9 +1,16 @@
 <template>
   <nav-bar></nav-bar>
-  <div class="center-l">
-    <search-bar @searchThisTerm="runAudit($event)"></search-bar>
-    <button @click="runBatch()"></button>
-    <the-platform :data="AuditData" :batch="batch"></the-platform>
+  <div class="cover">
+    <div class="spacer"></div>
+    <div class="centered center-l">
+      <search-bar
+        @searchThisTerm="
+          runAudit($event);
+          getJobs();
+        "
+      ></search-bar>
+    </div>
+    <job-list :jobData="Jobs"></job-list>
   </div>
 </template>
 
@@ -11,7 +18,7 @@
 import { defineComponent, ref } from "vue";
 import NavBar from "./components/NavBar.vue";
 import SearchBar from "./components/SearchBar.vue";
-import ThePlatform from "./components/ThePlatform.vue";
+import JobList from "./components/JobList.vue";
 import "./assets/reset.css";
 import "./assets/style.css";
 import tempData from "../report/www.hyperionweb.dev/summary.json";
@@ -21,12 +28,24 @@ import longPollAPI from "./services/longPollAPI";
 export default defineComponent({
   name: "App",
   setup() {
+    const Jobs = ref([]);
     const AuditData = ref([]);
     const batch = ref(false);
     const updateData = function ($event: any) {
       AuditData.value = $event;
     };
-    return { AuditData, updateData, batch };
+    console.log("Existing App Cookie: " + document.cookie);
+    const getInternalJobs = function (result: any) {
+      Jobs.value = result.data;
+    };
+    const getJobs = async function () {
+      await axios.get("/api/init").then((res) => {
+        Jobs.value = res.data;
+      });
+    };
+    getJobs();
+
+    return { AuditData, updateData, batch, Jobs, getJobs, getInternalJobs };
   },
   data() {
     return {
@@ -36,12 +55,12 @@ export default defineComponent({
   components: {
     NavBar,
     SearchBar,
-    ThePlatform,
+    JobList,
   },
   methods: {
     runAudit(search: string) {
       let AuditAPI = axios.create({});
-      longPollAPI(AuditAPI);
+      longPollAPI(AuditAPI, this.getJobs);
       AuditAPI({
         method: "POST",
         url: "/api/crawl",
@@ -50,8 +69,8 @@ export default defineComponent({
         },
       })
         .then((res) => {
+          console.log(res);
           this.updateData(res.data.result.tableTransform);
-
           this.runBatch(AuditAPI, res.data.result.tableTransform);
         })
         .catch((err) => {
@@ -90,5 +109,35 @@ export default defineComponent({
   margin-right: auto;
   margin-top: 8rem;
   max-width: 80%;
+}
+
+.cover {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.cover > * {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.cover > :first-child:not(centered) {
+  margin-top: 0;
+}
+
+.cover > :last-child:not(centered) {
+  margin-bottom: 0;
+}
+
+.cover > centered {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.spacer {
+  height: 8rem;
 }
 </style>
